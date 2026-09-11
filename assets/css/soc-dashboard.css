@@ -1,0 +1,82 @@
+#soc-dashboard {
+  margin-top: 2rem;
+}
+
+.soc-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1rem;
+}
+
+.soc-stats {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.stat-tile {
+  padding: 0.8rem;
+  border-left: 4px solid #00d9ff;
+}
+
+.stat-tile p {
+  margin: 0;
+  color: #ffffff;
+}
+
+.stat-tile strong {
+  font-size: 1.45rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: #00ff9f;
+}
+
+.soc-console {
+  min-height: 360px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.soc-console-head {
+  border-bottom: 1px solid rgba(0, 217, 255, 0.3);
+  padding: 0.7rem 0.9rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: #00d9ff;
+}
+
+.threat-feed {
+  height: 330px;
+  overflow: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.86rem;
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.55));
+}
+
+.feed-line {
+  padding: 0.35rem 0.45rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.feed-line.INFO {
+  color: #56bfff;
+  border-color: rgba(86, 191, 255, 0.28);
+}
+
+.feed-line.WARNING {
+  color: #ffd86b;
+  border-color: rgba(255, 216, 107, 0.25);
+}
+
+.feed-line.CRITICAL {
+  color: #ff5f8e;
+  border-color: rgba(255, 95, 142, 0.3);
+}
+
+@media (max-width: 920px) {
+  .soc-layout {
+    grid-template-columns: 1fr;
+  }
+}
+

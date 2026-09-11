@@ -1,0 +1,67 @@
+.threat-map-panel {
+  margin-top: 2.2rem;
+}
+
+.threat-map-wrap {
+  position: relative;
+  min-height: 520px;
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  border-radius: 16px;
+  background: radial-gradient(circle at 60% 30%, rgba(0, 217, 255, 0.12), rgba(11, 15, 20, 0.94));
+  overflow: hidden;
+}
+
+#globe {
+  width: 100%;
+  height: 520px;
+  display: block;
+}
+
+.threat-counters {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: grid;
+  gap: 0.6rem;
+  width: min(260px, calc(100% - 2rem));
+}
+
+.threat-counters article {
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 0, 85, 0.28);
+  background: rgba(6, 10, 16, 0.8);
+}
+
+.threat-counters p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 0.84rem;
+}
+
+.threat-counters strong {
+  color: #ff0055;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.25rem;
+}
+
+.threat-fallback {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  border: 1px solid rgba(255, 0, 85, 0.28);
+  background: rgba(0, 0, 0, 0.68);
+  color: #ff729f;
+  padding: 0.6rem;
+  border-radius: 10px;
+}
+
+@media (max-width: 760px) {
+  #globe {
+    height: 380px;
+  }
+
+  .threat-map-wrap {
+    min-height: 380px;
+  }
+}
+

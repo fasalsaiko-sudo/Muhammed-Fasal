@@ -1,0 +1,42 @@
+.hacker-room-shell {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#hacker-room-canvas {
+  width: 100vw;
+  height: calc(100vh - 70px);
+  display: block;
+  background: #0b0f14;
+}
+
+.hacker-room-hud {
+  position: fixed;
+  top: 82px;
+  left: 1rem;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 159, 0.35);
+  color: #9efecf;
+  font-family: 'JetBrains Mono', monospace;
+  border-radius: 10px;
+  padding: 0.7rem;
+}
+
+.hacker-room-hud p {
+  margin: 0.2rem 0;
+}
+
+.hacker-room-note {
+  position: fixed;
+  right: 1rem;
+  top: 82px;
+  z-index: 90;
+  border: 1px solid rgba(0, 217, 255, 0.35);
+  background: rgba(7, 11, 18, 0.78);
+  border-radius: 10px;
+  padding: 0.7rem;
+  color: #93e4ff;
+  font-family: 'JetBrains Mono', monospace;
+}

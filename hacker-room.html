@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hacker Room | Muhammed Fasal</title>
+  <meta name="description" content="Interactive 3D hacker room with monitor shortcuts to projects, certifications, GitHub, and blog." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/hacker-room.css" />
+</head>
+<body data-page="hacker-room">
+  <header class="site-header">
+    <nav class="navbar" aria-label="Main Navigation">
+      <div class="logo">MF</div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="profile.html">About</a></li>
+        <li><a href="writeups.html">Projects</a></li>
+        <li><a href="game.html">Quiz</a></li>
+        <li><a href="hacker-room.html">Hacker Room</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="theme-btn" class="nav-btn" aria-label="Toggle theme">T</button>
+        <button id="menuToggle" class="mobile-menu-toggle" aria-label="Open menu">M</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="hacker-room-shell">
+    <section class="hacker-room-hud">
+      <p>Controls: WASD move</p>
+      <p>Hold mouse drag to look around</p>
+      <p>Click monitors to open destinations</p>
+    </section>
+    <section class="hacker-room-note">Monitors: Projects | Certifications | GitHub | Blog</section>
+    <canvas id="hacker-room-canvas" aria-label="3D hacker room"></canvas>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/hacker-room.js" defer></script>
+</body>
+</html>
+

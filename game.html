@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Muhammed Fasal | Cybersecurity Quiz Arena</title>
+  <meta name="description" content="Advanced cybersecurity quiz with difficulty levels, timer, leaderboard, and analytics dashboard." />
+  <meta property="og:title" content="Cybersecurity Quiz Arena" />
+  <meta property="og:description" content="Test and improve cybersecurity awareness with analytics and challenge modes." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="game">
+  <div class="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <nav class="navbar" aria-label="Main Navigation">
+      <div class="logo">MF</div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="profile.html">About</a></li>
+        <li><a href="writeups.html">Projects</a></li>
+        <li><a href="game.html">Quiz</a></li>
+        <li><a href="hacker-room.html">Hacker Room</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button id="theme-btn" class="nav-btn" aria-label="Toggle theme">T</button>
+        <button id="menuToggle" class="mobile-menu-toggle" aria-label="Open menu">M</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section id="quiz-intro" class="quiz-panel reveal terminal" style="background-image:linear-gradient(rgba(9,13,20,0.9),rgba(9,13,20,0.9)),url('assets/images/game/images-2.jpg');background-size:cover;background-position:center;">
+      <h1 class="section-title">Advanced Cyber Quiz Arena</h1>
+      <p>Choose a difficulty level and start the timed challenge. Scores are tracked in local leaderboard.</p>
+      <div class="hero-buttons">
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty" class="btn" aria-label="Select difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <button id="start-quiz-btn" class="btn primary" type="button">Start Quiz</button>
+      </div>
+    </section>
+
+    <section id="quiz-panel" class="quiz-panel glass hidden" style="padding:1rem;">
+      <div class="quiz-header">
+        <strong id="question-number">Question 1</strong>
+        <strong>Timer: <span id="timer">0s</span></strong>
+      </div>
+      <div class="progress-bar" aria-label="Progress">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <article style="margin-top:1rem;">
+        <h2 id="question-text"></h2>
+        <ul id="answer-buttons" class="answer-grid"></ul>
+      </article>
+      <button id="next-btn" class="btn hidden" type="button" style="margin-top:1rem;">Next Question</button>
+    </section>
+
+    <section id="result-section" class="quiz-panel hidden reveal">
+      <h2 class="section-title">Results Dashboard</h2>
+      <div class="results-grid">
+        <article class="glass" style="padding:1rem;"><strong id="score">0/0</strong><p>Final Score</p></article>
+        <article class="glass" style="padding:1rem;"><strong id="accuracy">0%</strong><p>Accuracy</p></article>
+        <article class="glass" style="padding:1rem;"><strong id="level">-</strong><p>Level</p></article>
+      </div>
+
+      <section class="glass" style="padding:1rem;margin-top:1rem;">
+        <h3>Leaderboard (Top 5)</h3>
+        <p>Best Score: <strong id="best-score">0/0</strong></p>
+        <ol id="leaderboard"></ol>
+      </section>
+
+      <button id="retry-btn" class="btn primary" type="button" style="margin-top:1rem;">Play Again</button>
+    </section>
+  </main>
+
+  <section class="chatbot" aria-label="AI chatbot">
+    <div class="chat-window glass">
+      <div class="chat-head">
+        <strong>AI Security Assistant</strong>
+        <button class="close-chat" type="button" aria-label="Close chatbot">x</button>
+      </div>
+      <div class="chat-body"></div>
+      <form class="chat-form">
+        <label for="chatInput" class="sr-only">Ask a question</label>
+        <input id="chatInput" type="text" placeholder="Ask about profile, services, projects..." />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+    <button class="chat-toggle" type="button" aria-label="Open AI chatbot">AI</button>
+  </section>
+
+  <footer class="site-footer">
+    <p>(c) 2026 Muhammed Fasal | Cybersecurity Researcher</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+  <script src="assets/js/main.js" defer></script>
+  <script src="assets/js/game.js" defer></script>
+</body>
+</html>
+

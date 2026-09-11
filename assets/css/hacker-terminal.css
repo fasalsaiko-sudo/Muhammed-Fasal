@@ -1,0 +1,33 @@
+#hacker-terminal {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  color: #00ff9f;
+  z-index: 130;
+  display: none;
+  padding: 1rem;
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+#hacker-terminal.active {
+  display: block;
+}
+
+#terminal-output {
+  white-space: pre-wrap;
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+#terminal-output::after {
+  content: '_';
+  color: #00d9ff;
+  animation: blinkCursor 0.8s steps(1) infinite;
+}
+
+@keyframes blinkCursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}

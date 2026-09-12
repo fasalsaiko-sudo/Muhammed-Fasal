@@ -1,0 +1,310 @@
+{
+  "schema_version": 1,
+  "_comment": "Content extracted verbatim from the static index.html at commit 1efab73. Local asset paths are kept as media references (prefix 'local:') until scripts/sync_media_to_drive.py moves them into Google Drive.",
+  "profile": {
+    "name": "Muhammed Fasal",
+    "headline": "Cybersecurity Researcher · VAPT & Web Application Security",
+    "short_bio": "Focused on vulnerability assessment, penetration testing, web application security, and security research—with hands-on experience identifying, validating, documenting, and helping remediate security weaknesses.",
+    "long_bio": "I am an early-career cybersecurity professional with a primary focus on vulnerability assessment, penetration testing, and web application security. My work combines structured testing with manual validation, risk-focused reporting, and remediation guidance.\n\nThrough internship experience, security projects, labs, and bug bounty research, I have worked with OWASP Top 10 testing, application mapping, authentication and authorization checks, and common security tooling. I also bring hands-on IT administration exposure, which strengthens my understanding of the systems and people security work must support.",
+    "location": "Kerala, India",
+    "availability_status": "Open to cybersecurity opportunities",
+    "email": "fasalmuhammed7025@gmail.com",
+    "profile_image": {
+      "path": "assets/images/muhammed-fasal-hero.png",
+      "alt": "Muhammed Fasal in a black suit",
+      "category": "PROFILE"
+    }
+  },
+  "social_links": [
+    { "platform": "linkedin", "label": "LinkedIn", "url": "https://www.linkedin.com/in/muhammed-fasal-ms/", "icon": "linkedin", "sort_order": 1 },
+    { "platform": "github", "label": "GitHub", "url": "https://github.com/Fasal17", "icon": "github", "sort_order": 2 },
+    { "platform": "bugcrowd", "label": "Bugcrowd", "url": "https://bugcrowd.com/h/Fasal17", "icon": "bugcrowd", "sort_order": 3 }
+  ],
+  "experience": [
+    {
+      "company": "IQRAA International Hospital & Research Centre",
+      "role": "Information Technology Administrator",
+      "location": "Kerala, India",
+      "employment_type": "Full-time",
+      "start_date": "2026-02-01",
+      "end_date": null,
+      "is_current": true,
+      "description": "Supporting IT infrastructure, end users, troubleshooting, and operational system availability in a live organizational environment. This role builds practical familiarity with systems, network environments, and secure operational practices.",
+      "highlights": [],
+      "technologies": ["Windows", "Linux", "Networking", "IT administration"],
+      "visible": true,
+      "sort_order": 1
+    },
+    {
+      "company": "Encrypt Bytes Labs",
+      "role": "Cyber Security Researcher Intern",
+      "location": "Remote",
+      "employment_type": "Internship",
+      "start_date": "2025-11-01",
+      "end_date": "2026-01-31",
+      "is_current": false,
+      "description": "Vulnerability assessment and manual web application security testing in authorized environments.",
+      "highlights": [
+        "Performed vulnerability assessment and manual web application security testing in authorized environments.",
+        "Applied OWASP Top 10-based testing, application mapping, and vulnerability validation.",
+        "Documented findings with severity assessment, CVSS where applicable, impact, and remediation recommendations.",
+        "Used Burp Suite, Nmap, WhatWeb, SSLScan, and Kali Linux to support security research workflows."
+      ],
+      "technologies": ["Burp Suite", "Nmap", "WhatWeb", "SSLScan", "Kali Linux", "OWASP Top 10"],
+      "visible": true,
+      "sort_order": 2
+    },
+    {
+      "company": "Intrella Technologies and Software Services Pvt. Ltd.",
+      "role": "Software Development Intern",
+      "location": "Kerala, India",
+      "employment_type": "Internship",
+      "start_date": "2025-02-01",
+      "end_date": "2025-05-31",
+      "is_current": false,
+      "description": "Contributed to the development and testing workflow for a Hostel Management System, building experience with application logic, data handling, and delivery practices.",
+      "highlights": [],
+      "technologies": ["Python", "Web development", "Testing"],
+      "visible": true,
+      "sort_order": 3
+    }
+  ],
+  "skill_categories": [
+    { "name": "Offensive security", "description": "Testing and validation work", "icon": "shield", "sort_order": 1 },
+    { "name": "Tools", "description": "Security tooling used in projects and labs", "icon": "tools", "sort_order": 2 },
+    { "name": "Systems & automation", "description": "Networking, operating systems and scripting", "icon": "terminal", "sort_order": 3 }
+  ],
+  "skills": [
+    { "category": "Offensive security", "name": "Vulnerability assessment", "level": "ADVANCED", "sort_order": 1 },
+    { "category": "Offensive security", "name": "Web application penetration testing", "level": "ADVANCED", "sort_order": 2 },
+    { "category": "Offensive security", "name": "OWASP Top 10 testing", "level": "ADVANCED", "sort_order": 3 },
+    { "category": "Offensive security", "name": "Authentication & authorization testing", "level": "INTERMEDIATE", "sort_order": 4 },
+    { "category": "Offensive security", "name": "Vulnerability validation & reporting", "level": "ADVANCED", "sort_order": 5 },
+    { "category": "Tools", "name": "Burp Suite", "level": "ADVANCED", "sort_order": 1 },
+    { "category": "Tools", "name": "Nmap", "level": "ADVANCED", "sort_order": 2 },
+    { "category": "Tools", "name": "Wireshark", "level": "INTERMEDIATE", "sort_order": 3 },
+    { "category": "Tools", "name": "Metasploit", "level": "INTERMEDIATE", "sort_order": 4 },
+    { "category": "Tools", "name": "WhatWeb", "level": "INTERMEDIATE", "sort_order": 5 },
+    { "category": "Tools", "name": "SSLScan", "level": "INTERMEDIATE", "sort_order": 6 },
+    { "category": "Tools", "name": "Kali Linux", "level": "ADVANCED", "sort_order": 7 },
+    { "category": "Tools", "name": "Curl", "level": "INTERMEDIATE", "sort_order": 8 },
+    { "category": "Tools", "name": "OpenSSL", "level": "INTERMEDIATE", "sort_order": 9 },
+    { "category": "Tools", "name": "Browser developer tools", "level": "INTERMEDIATE", "sort_order": 10 },
+    { "category": "Systems & automation", "name": "TCP/IP · HTTP/HTTPS · DNS", "level": "INTERMEDIATE", "sort_order": 1 },
+    { "category": "Systems & automation", "name": "Linux", "level": "ADVANCED", "sort_order": 2 },
+    { "category": "Systems & automation", "name": "Windows", "level": "INTERMEDIATE", "sort_order": 3 },
+    { "category": "Systems & automation", "name": "IT administration", "level": "INTERMEDIATE", "sort_order": 4 },
+    { "category": "Systems & automation", "name": "Python", "level": "INTERMEDIATE", "sort_order": 5 },
+    { "category": "Systems & automation", "name": "Bash", "level": "INTERMEDIATE", "sort_order": 6 },
+    { "category": "Systems & automation", "name": "HTML · CSS · JavaScript", "level": "INTERMEDIATE", "sort_order": 7 },
+    { "category": "Systems & automation", "name": "Flask", "level": "INTERMEDIATE", "sort_order": 8 },
+    { "category": "Systems & automation", "name": "Pandas · NumPy · Scikit-learn", "level": "INTERMEDIATE", "sort_order": 9 }
+  ],
+  "projects": [
+    {
+      "title": "Hospital Management System Security Assessment",
+      "slug": "hospital-management-system-security-assessment",
+      "short_description": "Structured security assessment of a PHP-based Hospital Management System in an authorized, controlled testing environment.",
+      "description": "Authorized testing of a local, intentionally vulnerable PHP application—not a production hospital system.",
+      "problem": "A PHP-based Hospital Management System needed an independent review of authentication, authorization and input handling before it could be treated as trustworthy.",
+      "solution": "Mapped application areas, reviewed authentication, authorization and input handling, then manually validated observations using Burp Suite and browser tools. Findings were organized against OWASP guidance and prioritised with risk assessment.",
+      "methodology": "Application mapping → authentication and authorization review → input handling review → manual validation → risk classification → structured reporting.",
+      "category": "vapt",
+      "security_focus": "VAPT / Web application security",
+      "target_type": "Web application (authorized lab)",
+      "testing_methodology": "OWASP Top 10 based manual testing with Burp Suite and browser tooling.",
+      "tools_used": ["Burp Suite", "Browser developer tools", "OWASP Top 10"],
+      "technologies": ["PHP", "Burp Suite", "OWASP Top 10", "CVSS"],
+      "owasp_category": "OWASP Top 10",
+      "findings_summary": "Produced a structured assessment format covering evidence, impact, remediation recommendations, and reporting. Findings are not listed publicly because only documented, sanitized results should be shared.",
+      "remediation_summary": "Findings were paired with prioritised remediation guidance and verification steps.",
+      "featured": true,
+      "status": "PUBLISHED",
+      "sort_order": 1,
+      "tags": ["Burp Suite", "OWASP Top 10", "CVSS"]
+    },
+    {
+      "title": "WebSafeScan",
+      "slug": "websafescan",
+      "short_description": "Bash-based utility for initial web security checks: headers, TLS configuration, cookie attributes, and technology fingerprinting.",
+      "description": "Automate repeatable early-stage web security checks without replacing manual penetration testing.",
+      "problem": "Early-stage web security checks are repetitive and easy to skip, which weakens the coverage of an assessment.",
+      "solution": "Checks HTTP security headers, TLS and certificate configuration, cookie security attributes, and technologies exposed by a target. The tool combines Bash with Curl, OpenSSL, SSLScan, and WhatWeb.",
+      "methodology": "Repeatable automated checks produce consistent coverage; results are then reviewed in context before being treated as findings.",
+      "category": "tool",
+      "security_focus": "Security tool / Bash",
+      "target_type": "Web application (authorized targets)",
+      "testing_methodology": "Automated header, TLS and cookie checks with manual review.",
+      "tools_used": ["Bash", "Curl", "OpenSSL", "SSLScan", "WhatWeb"],
+      "technologies": ["Bash", "Curl", "OpenSSL", "SSLScan"],
+      "findings_summary": "Automation is useful for coverage and consistency; results still require contextual review and manual validation before they are treated as security findings.",
+      "github_url": "https://github.com/Fasal17",
+      "featured": true,
+      "status": "PUBLISHED",
+      "sort_order": 2,
+      "tags": ["Bash", "Curl", "OpenSSL", "SSLScan"]
+    },
+    {
+      "title": "Custom Linux Privilege Escalation Lab",
+      "slug": "custom-linux-privilege-escalation-lab",
+      "short_description": "A self-created CTF machine for learning Linux enumeration, insecure configuration review, and privilege-escalation concepts safely.",
+      "description": "Self-created Linux CTF lab, designed exclusively for controlled learning.",
+      "problem": "Privilege-escalation concepts are hard to learn safely without a controlled, reproducible environment.",
+      "solution": "Practice methodical enumeration and identify insecure Linux configurations that can create a privilege-escalation path.",
+      "methodology": "Enumeration → configuration review → validation → defensive remediation for each concept.",
+      "category": "lab",
+      "security_focus": "Linux security / Controlled lab",
+      "target_type": "Self-hosted CTF machine",
+      "testing_methodology": "Manual Linux enumeration and privilege-escalation testing in a self-controlled lab.",
+      "tools_used": ["Linux", "Bash"],
+      "technologies": ["Linux", "Bash", "Permissions", "CTF"],
+      "findings_summary": "The lab explores permissions, sudo configuration, SUID binaries, capabilities, cron jobs, and service configuration, with defensive remediation considered alongside each concept.",
+      "featured": true,
+      "status": "PUBLISHED",
+      "sort_order": 3,
+      "tags": ["Linux", "Bash", "Permissions", "CTF"]
+    },
+    {
+      "title": "Browser Workflow Automation Tool",
+      "slug": "browser-workflow-automation-tool",
+      "short_description": "Python desktop automation for browser and application-window workflow tasks.",
+      "description": "Desktop workflow automation built with Python, PyAutoGUI, PyGetWindow, and the standard webbrowser module. It demonstrates controlled application-window interaction and repetitive task automation.",
+      "category": "other",
+      "security_focus": "Automation / Python",
+      "technologies": ["Python", "PyAutoGUI", "PyGetWindow"],
+      "tools_used": ["Python", "PyAutoGUI", "PyGetWindow"],
+      "featured": false,
+      "status": "PUBLISHED",
+      "sort_order": 4,
+      "tags": ["Python", "PyAutoGUI", "PyGetWindow"]
+    },
+    {
+      "title": "Cybersecurity Awareness Quiz",
+      "slug": "cybersecurity-awareness-quiz",
+      "short_description": "Interactive browser-based quiz covering core cybersecurity awareness concepts with local score tracking.",
+      "description": "An interactive quiz with difficulty levels, a timer, a local leaderboard and a results dashboard. Scores are stored only in the browser.",
+      "category": "other",
+      "security_focus": "Security education",
+      "technologies": ["JavaScript", "localStorage", "HTML", "CSS"],
+      "demo_url": "game.html",
+      "featured": false,
+      "status": "PUBLISHED",
+      "sort_order": 5,
+      "tags": ["JavaScript", "localStorage", "UI"]
+    },
+    {
+      "title": "Weather Prediction System",
+      "slug": "weather-prediction-system",
+      "short_description": "Rainfall prediction application using historical weather data, preprocessing, model evaluation, and Flask integration.",
+      "description": "Machine-learning web project using Python, Pandas, NumPy, Scikit-learn, Flask, HTML, and CSS. The application uses historical weather data to support rainfall prediction and demonstrates data-preparation and model-integration workflows.",
+      "category": "other",
+      "security_focus": "Machine learning / Web application",
+      "technologies": ["Python", "Flask", "Scikit-learn", "Pandas", "NumPy"],
+      "tools_used": ["Python", "Flask", "Scikit-learn"],
+      "featured": false,
+      "status": "PUBLISHED",
+      "sort_order": 6,
+      "tags": ["Python", "Flask", "Scikit-learn"]
+    }
+  ],
+  "certifications": [
+    {
+      "title": "Azure AI Fundamentals",
+      "issuer": "Microsoft",
+      "issue_date": "2024-06-01",
+      "expiry_status": "NO_EXPIRY",
+      "featured": true,
+      "status": "PUBLISHED",
+      "sort_order": 1,
+      "media": [{ "path": "assets/images/certs/azure-ai.jpg", "caption": "Microsoft Azure AI Fundamentals certificate" }]
+    },
+    {
+      "title": "CCST Cybersecurity",
+      "issuer": "Cisco",
+      "issue_date": "2024-03-01",
+      "expiry_status": "NO_EXPIRY",
+      "featured": true,
+      "status": "PUBLISHED",
+      "sort_order": 2,
+      "media": [{ "path": "assets/images/certs/cisco-ccst.jpg", "caption": "Cisco CCST Cybersecurity certificate" }]
+    },
+    {
+      "title": "Certified Pentesting Professional",
+      "issuer": "Encrypt Bytes",
+      "issue_date": "2025-10-01",
+      "expiry_status": "NO_EXPIRY",
+      "featured": true,
+      "status": "PUBLISHED",
+      "sort_order": 3,
+      "media": [{ "path": "assets/images/certs/CPP.jpg", "caption": "Certified Pentesting Professional certificate" }]
+    },
+    {
+      "title": "Junior Penetration Tester",
+      "issuer": "Encrypt Bytes",
+      "issue_date": "2025-06-01",
+      "expiry_status": "NO_EXPIRY",
+      "featured": true,
+      "status": "PUBLISHED",
+      "sort_order": 4,
+      "media": [{ "path": "assets/images/certs/junior-pt.jpg", "caption": "Junior Penetration Tester certificate" }]
+    },
+    {
+      "_note": "Present in the repository but not rendered by the static index.html. Imported as a draft so the asset is not lost.",
+      "title": "Intrella Internship Certificate",
+      "issuer": "Intrella Technologies",
+      "expiry_status": "NO_EXPIRY",
+      "featured": false,
+      "status": "DRAFT",
+      "sort_order": 5,
+      "media": [{ "path": "assets/images/certs/intrella-internship.jpg", "caption": "Intrella internship certificate" }]
+    },
+    {
+      "_note": "Present in the repository but not rendered by the static index.html. Imported as a draft so the asset is not lost.",
+      "title": "Magic Bus Certificate",
+      "issuer": "Magic Bus",
+      "expiry_status": "NO_EXPIRY",
+      "featured": false,
+      "status": "DRAFT",
+      "sort_order": 6,
+      "media": [{ "path": "assets/images/certs/magic-bus.jpg", "caption": "Magic Bus certificate" }]
+    }
+  ],
+  "writeups": [
+    {
+      "title": "Building a repeatable web security baseline check",
+      "slug": "repeatable-web-security-baseline-check",
+      "summary": "How WebSafeScan turns repetitive header, TLS and cookie checks into a consistent baseline — and why the output still needs a human.",
+      "content": "## Context\n\nEarly assessment work is repetitive: the same header checks, the same TLS review, the same cookie attributes. Repetition is exactly where coverage gets skipped.\n\n## Approach\n\nWebSafeScan automates that baseline: HTTP security headers, TLS and certificate configuration, cookie security attributes, and the technologies a target exposes.\n\n## What it does not do\n\nAutomation produces coverage, not conclusions. Every result still needs contextual review and manual validation before it is treated as a finding.\n\n## Takeaway\n\nAutomate the boring 20% so the manual 80% gets the attention it deserves.",
+      "category": "Security Tooling",
+      "severity": "INFO",
+      "status": "DRAFT",
+      "featured": false,
+      "tags": ["tooling", "automation", "baseline"]
+    }
+  ],
+  "cv": {
+    "version_name": "CV 2026 — current",
+    "notes": "Publicly downloadable resume already linked from the static portfolio.",
+    "drive_file_id": "1r_GAL74ZHspFKN3NY7adFykLIlX2IynN",
+    "mime_type": "application/pdf",
+    "filename": "Muhammed-Fasal-CV.pdf"
+  },
+  "settings": {
+    "portfolio_title": "Muhammed Fasal | Cybersecurity & VAPT Portfolio",
+    "seo_description": "Muhammed Fasal is a cybersecurity professional focused on VAPT, penetration testing, web application security, and security research.",
+    "keywords": "cybersecurity, VAPT, penetration testing, web application security, OWASP, bug bounty, Muhammed Fasal",
+    "og_title": "Muhammed Fasal | Cybersecurity & VAPT Portfolio",
+    "og_description": "Cybersecurity, VAPT, web application security, and security research portfolio.",
+    "og_image_url": "assets/images/muhammed-fasal-hero.png",
+    "contact_email": "fasalmuhammed7025@gmail.com",
+    "availability_status": "Open to cybersecurity opportunities",
+    "footer_text": "© Muhammed Fasal",
+    "theme": "dark",
+    "feature_flags": {
+      "show_writeups": true,
+      "show_certifications": true,
+      "show_experience": true,
+      "show_resume_section": true
+    }
+  }
+}

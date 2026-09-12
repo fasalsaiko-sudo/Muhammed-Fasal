@@ -1,0 +1,27 @@
+# --- Core web framework ---
+fastapi==0.141.1
+uvicorn[standard]==0.38.0
+python-multipart==0.0.20
+
+# --- Validation / configuration ---
+pydantic==2.13.5
+pydantic-settings==2.13.1
+email-validator==2.3.0
+
+# --- Database ---
+SQLAlchemy==2.0.52
+alembic==1.18.1
+psycopg[binary]==3.3.5
+
+# --- Google Drive storage ---
+google-api-python-client==2.187.0
+google-auth==2.45.0
+google-auth-httplib2==0.3.0
+
+# --- HTTP client (GitHub OAuth token exchange) ---
+httpx==0.28.1
+
+# --- Quality / test tooling (dev) ---
+pytest==8.4.2
+ruff==0.16.7
+bandit==1.9.4

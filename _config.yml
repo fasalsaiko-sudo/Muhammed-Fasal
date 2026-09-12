@@ -1,0 +1,27 @@
+# GitHub Pages (Jekyll "legacy" build) serves the ROOT of this repository.
+# Everything that is not part of the public portfolio must be excluded here,
+# otherwise Python/Dart source and configuration templates get published at
+# https://fasalsaiko-sudo.github.io/Muhammed-Fasal/
+#
+# See docs/reports/phase1-repository-audit.md §6 for why this file exists.
+exclude:
+  - backend
+  - admin
+  - database
+  - docs
+  - scripts
+  - data
+  - node_modules
+  - vendor
+  - "*.py"
+  - "*.ini"
+  - "*.lock"
+  - pubspec.yaml
+  - requirements.txt
+  - docs/reports
+  - blog/README.md
+  - components/README.md
+  - README.md
+keep_files:
+  - favicon.svg
+  - robots.txt

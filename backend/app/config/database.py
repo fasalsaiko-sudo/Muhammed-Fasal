@@ -25,10 +25,17 @@ def _engine_kwargs(settings) -> dict[str, Any]:
     url = settings.database_url
     kwargs: dict[str, Any] = {"future": True}
     if url.startswith("postgresql"):
-        if settings.environment == "testing":
-            # Tests must not share connections: a single failed transaction can
-            # leave a pooled connection in a state that breaks later tests.
-            # Production keeps the pooled configuration below.
+        mode = settings.database_pool_class
+        if mode == "auto":
+            # Historically: no pooling while testing, so a failed transaction
+            # cannot leave a connection in a state that breaks later tests.
+            mode = "null" if settings.environment == "testing" else "queue"
+        if mode == "static":
+            from sqlalchemy.pool import StaticPool
+
+            kwargs["poolclass"] = StaticPool
+            kwargs["pool_pre_ping"] = True
+        elif mode == "null":
             from sqlalchemy.pool import NullPool
 
             kwargs["poolclass"] = NullPool

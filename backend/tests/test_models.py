@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import time
+
 import pytest
-from sqlalchemy import func, inspect, select, text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import create_engine, func, inspect, select, text
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session as SASession
+from sqlalchemy.pool import NullPool
 
 from app.models import (
     AdminSession,
@@ -111,6 +114,22 @@ def _engine_of(db):
     return getattr(bind, "engine", bind)
 
 
+def _probe_connection(db):
+    """The engine's connection, with the fixture session's transaction ended.
+
+    The suite may run with ``DATABASE_POOL_CLASS=static``, which the PGlite
+    harness requires: it serves exactly one connection at a time and drops
+    connections that arrive during rapid reconnect churn (measured: 17 failures
+    in 150 sequential connect/close cycles). Under that pool ``engine.connect()``
+    returns the same connection the session is using, so opening a second one is
+    impossible - the session must release its transaction first, and the probe
+    then runs on the one connection PGlite allows.
+    """
+    engine = _engine_of(db)
+    db.close()  # end the transaction; committed rows are unaffected
+    return engine.connect()
+
+
 def _constraint_error(db, statement: str) -> IntegrityError:
     """Execute ``statement`` on its own connection inside a SAVEPOINT.
 
@@ -126,7 +145,7 @@ def _constraint_error(db, statement: str) -> IntegrityError:
     widens it to a generic exception, and the constraint that fired is checked by
     name so an unrelated error cannot pass.
     """
-    connection = _engine_of(db).connect()
+    connection = _probe_connection(db)
     try:
         connection.execute(text("SAVEPOINT constraint_probe"))
         with pytest.raises(IntegrityError) as excinfo:
@@ -153,6 +172,26 @@ def _is_check_violation(error: IntegrityError) -> bool:
     )
 
 
+def _connect_with_retry(engine, attempts: int = 6):
+    """Open a connection, retrying the drops this harness is known to cause.
+
+    The PGlite socket server closes some connections that arrive during rapid
+    reconnect churn - measured at 17 failures in 150 sequential
+    connect/query/close cycles, independent of any application code. Retrying
+    here compensates for the harness; it does not relax what the surrounding test
+    asserts, which remains a specific ``IntegrityError`` caused by a named unique
+    violation. Against a real PostgreSQL server the first attempt succeeds.
+    """
+    last: Exception | None = None
+    for attempt in range(attempts):
+        try:
+            return engine.connect()
+        except OperationalError as exc:  # connection refused/closed by the harness
+            last = exc
+            time.sleep(0.05 * (attempt + 1))
+    raise AssertionError(f"could not open a probe connection after {attempts} attempts") from last
+
+
 def _orm_duplicate_insert_error(db, title: str, slug: str) -> IntegrityError:
     """Drive a duplicate insert through the real ORM path and return the error.
 
@@ -170,7 +209,18 @@ def _orm_duplicate_insert_error(db, title: str, slug: str) -> IntegrityError:
     single-use and discarded; the assertion stays on the specific
     ``IntegrityError`` plus its driver-level cause, never a generic exception.
     """
-    connection = _engine_of(db).connect().execution_options(isolation_level="AUTOCOMMIT")
+    # This probe needs a connection that is genuinely its own: AUTOCOMMIT cannot
+    # be applied to the connection the pool is holding. PGlite serves one
+    # connection at a time, so the pool's connection is disposed first to free
+    # the slot, and a single-use NullPool engine is used for the probe. Both are
+    # closed immediately, and the fixture session reconnects on next use.
+    engine = _engine_of(db)
+    url = engine.url
+    connect_args = dict(engine.dialect.create_connect_args(url)[1])
+    db.close()
+    engine.dispose()
+    probe_engine = create_engine(url, poolclass=NullPool, connect_args=connect_args)
+    connection = _connect_with_retry(probe_engine).execution_options(isolation_level="AUTOCOMMIT")
     session = SASession(bind=connection)
     try:
         session.add(Project(title=title, slug=slug))
@@ -180,6 +230,7 @@ def _orm_duplicate_insert_error(db, title: str, slug: str) -> IntegrityError:
     finally:
         session.close()
         connection.close()
+        probe_engine.dispose()
 
 
 def _assert_unique_violation(error: IntegrityError) -> None:

@@ -11,9 +11,11 @@ import secrets
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal
+from urllib.parse import urlparse
 
 from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import make_url
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 REPO_ROOT = BACKEND_ROOT.parent
@@ -23,6 +25,113 @@ Environment = Literal["development", "testing", "staging", "production"]
 
 def _split_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def _scheme_and_netloc(url: str) -> tuple[str, str]:
+    parsed = urlparse(url or "")
+    return parsed.scheme.lower(), parsed.netloc
+
+
+# Value shipped in .env.example; booting production with it still in place means
+# the database credentials were never actually configured.
+_PLACEHOLDER_DB_PASSWORDS = {"change-me", "changeme", "password", ""}
+
+
+def _validate_urls(settings: Settings) -> None:
+    """Reject OAuth/API URLs that cannot work, in every environment.
+
+    A malformed callback URL otherwise surfaces much later as an opaque
+    ``redirect_uri_mismatch`` page on github.com.
+    """
+    for name in ("api_base_url", "github_redirect_uri", "frontend_url", "admin_url"):
+        value = getattr(settings, name)
+        if not value:
+            continue
+        scheme, netloc = _scheme_and_netloc(value)
+        if scheme not in {"http", "https"} or not netloc:
+            raise ValueError(
+                f"{name.upper()} must be an absolute http(s) URL with a host, got {value!r}."
+            )
+    for entry in _split_csv(settings.cors_allowed_origins):
+        if entry == "*":
+            # Refused here rather than in the middleware: credentials are always
+            # allowed, and a wildcard with credentials is never acceptable.
+            raise ValueError(
+                "CORS_ALLOWED_ORIGINS must not contain '*'. The API allows credentialed "
+                "requests, so every origin has to be listed explicitly."
+            )
+        scheme, netloc = _scheme_and_netloc(entry)
+        if scheme not in {"http", "https"} or not netloc:
+            raise ValueError(
+                f"CORS_ALLOWED_ORIGINS entries must be absolute http(s) origins, got {entry!r}. "
+                "An origin has a scheme and host only - no path and no trailing slash."
+            )
+
+
+def _validate_session_windows(settings: Settings) -> None:
+    """Idle longer than absolute would make the absolute deadline meaningless."""
+    if settings.session_ttl_minutes <= 0 or settings.session_idle_ttl_minutes <= 0:
+        raise ValueError("SESSION_TTL_MINUTES and SESSION_IDLE_TTL_MINUTES must be positive.")
+    if settings.session_idle_ttl_minutes > settings.session_ttl_minutes:
+        raise ValueError(
+            "SESSION_IDLE_TTL_MINUTES must not exceed SESSION_TTL_MINUTES; "
+            "the absolute deadline is the outer bound and is never extended."
+        )
+    if settings.oauth_state_ttl_seconds <= 0:
+        raise ValueError("OAUTH_STATE_TTL_SECONDS must be positive.")
+
+
+def _validate_production(settings: Settings) -> None:
+    """Every check that must hold before this app serves real traffic.
+
+    Each one fails at startup with the name of the variable to fix, rather than
+    degrading silently into a deployment that cannot authenticate anyone.
+    """
+    if not settings.allowed_github_usernames:
+        raise ValueError(
+            "ALLOWED_GITHUB_USERNAME is required in production; there is no default "
+            "administrator. Comma-separate more than one GitHub login."
+        )
+    for name in ("api_base_url", "github_redirect_uri"):
+        value = getattr(settings, name)
+        if _scheme_and_netloc(value)[0] != "https":
+            raise ValueError(f"{name.upper()} must use https in production, got {value!r}.")
+    api_base = settings.api_base_url.rstrip("/")
+    if api_base and not settings.github_redirect_uri.startswith(f"{api_base}/"):
+        raise ValueError(
+            "GITHUB_REDIRECT_URI must be served by this API: it has to start with "
+            f"API_BASE_URL ({api_base!r}), got {settings.github_redirect_uri!r}. "
+            "A mismatch is the usual cause of GitHub's redirect_uri_mismatch error."
+        )
+    origins = settings.cors_origins
+    if not origins:
+        raise ValueError(
+            "CORS_ALLOWED_ORIGINS is required in production; with no origin the "
+            "browser admin cannot call the API at all."
+        )
+    for origin in origins:
+        if _scheme_and_netloc(origin)[0] != "https":
+            raise ValueError(
+                f"CORS_ALLOWED_ORIGINS must be https in production, got {origin!r}."
+            )
+    if not settings.secure_errors:
+        raise ValueError("SECURE_ERRORS must be true in production; stack traces must not leak.")
+    if not settings.rate_limit_enabled:
+        raise ValueError("RATE_LIMIT_ENABLED must be true in production.")
+    password = _db_password(settings.database_url)
+    if password in _PLACEHOLDER_DB_PASSWORDS:
+        raise ValueError(
+            "DATABASE_URL still has a placeholder password in production; "
+            "set a real credential."
+        )
+
+
+def _db_password(database_url: str) -> str | None:
+    """Extract the password without ever putting the URL in an error message."""
+    try:
+        return make_url(database_url).password
+    except Exception:  # noqa: BLE001 - an unparseable URL is a different failure
+        return None
 
 
 class Settings(BaseSettings):
@@ -42,13 +151,28 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://portfolio_cms:change-me@localhost:5432/portfolio_cms"
     database_pool_size: int = 5
     database_max_overflow: int = 10
+    # "auto" keeps the historical behaviour: NullPool while testing (a fresh
+    # connection per session, so no test inherits another's dirty transaction),
+    # QueuePool otherwise.
+    #
+    # "static" reuses one connection for the whole process. The PGlite test
+    # harness needs this: it serves a single connection at a time and closes
+    # connections that arrive during rapid reconnect churn (measured: 17 failures
+    # in 150 sequential connect/close cycles). SQLAlchemy rolls a connection
+    # back when it returns to the pool, so isolation is preserved.
+    #
+    # "queue" forces the pooled production configuration even while testing.
+    database_pool_class: Literal["auto", "static", "queue"] = "auto"
     secure_errors: bool = True
 
     # --- GitHub OAuth ------------------------------------------------------
     github_client_id: str = ""
     github_client_secret: str = ""
     github_redirect_uri: str = "http://localhost:8000/auth/github/callback"
-    allowed_github_username: str = "Fasal17"
+    # Deliberately empty: there is no hardcoded administrator. The allowlist must
+    # come from the environment, and production refuses to boot without it —
+    # otherwise a stale default account would silently retain admin access.
+    allowed_github_username: str = ""
     github_api_url: str = "https://api.github.com"
     github_authorize_url: str = "https://github.com/login/oauth/authorize"
     github_token_url: str = "https://github.com/login/oauth/access_token"
@@ -106,6 +230,10 @@ class Settings(BaseSettings):
 
     # --- docs --------------------------------------------------------------
     docs_enabled: bool = True
+    # Interactive API docs are a development aid. In production they publish the
+    # entire admin surface to anonymous callers, so they stay off unless this is
+    # explicitly enabled. `docs_enabled` alone is never enough in production.
+    docs_enabled_in_production: bool = False
 
     # ---------------------------------------------------------------- derived
     @field_validator("google_private_key")
@@ -145,6 +273,10 @@ class Settings(BaseSettings):
                 raise ValueError("COOKIE_SECURE must be true in production.")
             if not self.github_client_secret or not self.github_client_id:
                 raise ValueError("GitHub OAuth credentials are required in production.")
+        _validate_urls(self)
+        _validate_session_windows(self)
+        if self.environment == "production":
+            _validate_production(self)
         object.__setattr__(self, "log_level", self.log_level.upper())
         return self
 
@@ -154,16 +286,50 @@ class Settings(BaseSettings):
         return self.environment == "production"
 
     @property
+    def serve_api_docs(self) -> bool:
+        """Whether /docs, /redoc and /openapi.json are exposed.
+
+        ``docs_enabled`` is the master switch; production additionally requires
+        its own opt-in, because ``docs_enabled`` defaults to true for development
+        convenience and treating that as consent would publish the whole admin
+        API surface to anonymous callers.
+        """
+        return self.docs_enabled and (self.docs_enabled_in_production or not self.is_production)
+
+    @property
     def allowed_github_usernames(self) -> set[str]:
         return {name.strip().lower() for name in _split_csv(self.allowed_github_username)}
 
     @property
     def cors_origins(self) -> list[str]:
-        origins = _split_csv(self.cors_allowed_origins)
-        if self.frontend_url and self.frontend_url not in origins:
-            origins.append(self.frontend_url)
-        if self.admin_url and self.admin_url not in origins:
-            origins.append(self.admin_url)
+        """Explicit origin allowlist, normalised to ``scheme://host[:port]``.
+
+        A browser's ``Origin`` header never carries a path, so an entry such as
+        ``https://example.github.io/Repo/`` could never match. Reducing every
+        entry to its origin makes FRONTEND_URL/ADMIN_URL work as written instead
+        of silently allowing nothing.
+        """
+        candidates = [
+            *_split_csv(self.cors_allowed_origins),
+            self.frontend_url,
+            self.admin_url,
+        ]
+        origins: list[str] = []
+        for candidate in candidates:
+            if not candidate:
+                continue
+            if candidate == "*":
+                # _validate_urls already refuses this; kept verbatim so a
+                # programmatically built Settings still trips the middleware
+                # guard instead of being silently normalised away.
+                origins.append(candidate)
+                continue
+            scheme, netloc = _scheme_and_netloc(candidate)
+            if not scheme or not netloc:
+                continue
+            origin = f"{scheme}://{netloc}"
+            if origin not in origins:
+                origins.append(origin)
         return origins
 
     @property

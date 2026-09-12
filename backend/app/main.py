@@ -81,7 +81,11 @@ def configure_logging(settings: Settings) -> None:
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging(settings)
-    docs_enabled = settings.docs_enabled or not settings.is_production
+    # Production needs its own opt-in (see Settings.serve_api_docs): the old
+    # `docs_enabled or not is_production` expression served /docs in production
+    # whenever DOCS_ENABLED was left at its default, and ignored
+    # DOCS_ENABLED=false in development.
+    docs_enabled = settings.serve_api_docs
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):

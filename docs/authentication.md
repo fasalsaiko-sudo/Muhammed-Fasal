@@ -255,8 +255,8 @@ the results:
 
 ## Test status
 
-255 tests in the backend suite, run against SQLite and against the PGlite
-PostgreSQL-compatible harness.
+**289 tests** in the backend suite. They run against SQLite, against the PGlite
+PostgreSQL-compatible harness, and against **native PostgreSQL 16.2**.
 
 ```bash
 cd backend && . .venv/bin/activate
@@ -264,11 +264,22 @@ cd backend && . .venv/bin/activate
 # SQLite
 python -m pytest
 
-# PostgreSQL-compatible (PGlite harness), after `alembic upgrade head`
+# Native PostgreSQL (preferred — real server, real jsonb, concurrent connections)
+export DATABASE_URL="postgresql+psycopg://<user>:<password>@<host>:5432/portfolio_cms"
+export SKIP_SCHEMA_SETUP=1
+python -m pytest
+
+# PGlite harness (single-connection WASM build — see the caveat below)
 export DATABASE_URL="postgresql+psycopg://<user>:<password>@127.0.0.1:5433/portfolio_cms"
 export SKIP_SCHEMA_SETUP=1 DATABASE_POOL_CLASS=static
 python -m pytest
 ```
+
+Results as recorded: **289 passed, 0 failures, 0 skipped** on native PostgreSQL
+16.2 (twice), and **289 tests, 0 failures, 26 skipped** on SQLite (twice). The 26
+skips on SQLite are exactly `backend/tests/test_postgres_backend.py`, which is
+gated on a real PostgreSQL server. That gating is deliberate: a green SQLite run
+must never be readable as PostgreSQL support.
 
 `DATABASE_POOL_CLASS=static` is required against the PGlite harness and must not
 be confused with native PostgreSQL testing. PGlite is the real PostgreSQL engine
@@ -276,7 +287,14 @@ compiled to WASM, but it is single-process and serves **one connection at a
 time**; it also closes connections that arrive during rapid reconnect churn
 (measured: 17 failures in 150 sequential connect/query/close cycles, independent
 of application code). The default `auto` setting uses `NullPool` while testing —
-one fresh connection per session — which that harness cannot sustain.
+one fresh connection per session — which that harness cannot sustain. Native
+PostgreSQL runs fine on `auto`, which is why it is the preferred target.
+
+Per-file counts on native PostgreSQL 16.2: `test_deployment_config` 63,
+`test_auth` 58, `test_postgres_backend` 26, `test_database_backends` 24,
+`test_github_oauth_service` 24, `test_public_api` 24,
+`test_google_drive_service` 20, `test_models` 16, `test_config` 11,
+`test_security_middleware` 10, `test_error_handling` 8, `test_health` 5.
 
 `backend/tests/test_github_oauth_service.py` — 24 tests against
 `httpx.MockTransport`, covering: authorize URL contents and secret absence;
@@ -293,7 +311,19 @@ role gates, and token/secret non-logging. The single-use guard is
 mutation-verified: removing `used_at IS NULL` from the conditional UPDATE fails
 four of these tests.
 
-`backend/tests/test_deployment_config.py` — 55 tests for deployment readiness:
+`backend/tests/test_postgres_backend.py` — 26 tests, PostgreSQL-only, asserting
+what a SQLite run cannot see: the dialect really is PostgreSQL and no SQLite
+pragma is involved; seven `jsonb` columns are `jsonb` in the server's own
+catalogue; `jsonb` round trips preserve nested bools and ints; the `->`, `->>`,
+`@>` and `jsonb_array_elements` operators evaluate server-side; timestamp
+columns are `timestamp with time zone`; the unique slug index and the
+`admin_sessions` foreign key are enforced by the server; sessions and OAuth
+states survive a full `reset_engine()` teardown (an in-process restart); and only
+64-char hashes are persisted. Mutation-verified — all four of `technologies` →
+`text`, `expires_at` → naive `timestamp`, dropping `ix_projects_slug`, and
+`metadata` → `text` were caught, and the schema was restored exactly afterwards.
+
+`backend/tests/test_deployment_config.py` — 63 tests for deployment readiness:
 missing and incomplete OAuth configuration, invalid CORS configuration,
 wildcard rejection, origin normalisation, `SameSite`/`Secure` behaviour, callback
 URL validation, the full production-versus-development policy, docs exposure,
@@ -301,5 +331,6 @@ and the absence of secrets from health responses, error responses, and startup
 error messages.
 
 **Not verified:** any real round trip with `github.com`, and any live deployment
-(real TLS, real browser cookies, real CORS preflight from the hosted admin). Both
-need credentials and a deployed environment; see the manual checklist above.
+on a permanent public HTTPS host (real TLS, real browser cookies, real CORS
+preflight from the hosted admin). Both need credentials and a deployed
+environment; see the manual checklist above and `docs/deployment.md`.

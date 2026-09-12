@@ -43,6 +43,7 @@ from app.config.settings import get_settings
 from app.main import create_app
 from app.middleware.rate_limit import get_limiter
 from app.models import Base
+from app.utils.cache import reset_cache
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -81,10 +82,17 @@ def _truncate_all() -> None:
 
 @pytest.fixture(autouse=True)
 def _clean_state():
+    """Isolation: rate limiter, public cache and all rows are reset per test.
+
+    The public API caches payloads in-process, so without this a row deleted by
+    one test would still be served to the next.
+    """
     get_limiter().reset()
+    reset_cache()
     yield
     _truncate_all()
     get_limiter().reset()
+    reset_cache()
 
 
 @pytest.fixture

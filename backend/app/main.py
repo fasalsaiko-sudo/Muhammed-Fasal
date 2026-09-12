@@ -25,6 +25,7 @@ from app.middleware.cors import build_cors_middleware
 from app.middleware.request_context import RequestContextMiddleware
 from app.middleware.security import SecurityHeadersMiddleware
 from app.routes import health_router
+from app.routes.public import public_router
 
 _SECRET_PATTERN = re.compile(r"(?i)(token|secret|password|private_key|authorization)=([^\s&]+)")
 
@@ -106,6 +107,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     build_cors_middleware(app, settings)
 
     app.include_router(health_router)
+    app.include_router(public_router)
     _register_error_handlers(app, settings)
     return app
 

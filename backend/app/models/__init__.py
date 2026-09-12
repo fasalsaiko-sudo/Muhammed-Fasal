@@ -20,6 +20,7 @@ from app.models.enums import (
 )
 from app.models.experience import Experience
 from app.models.media import Media
+from app.models.oauth import OAuthState
 from app.models.profile import Profile, SocialLink
 from app.models.project import Project, ProjectMedia, Tag, project_tags
 from app.models.session import AdminSession
@@ -44,6 +45,7 @@ __all__ = [
     "Media",
     "MediaCategory",
     "MediaType",
+    "OAuthState",
     "Profile",
     "Project",
     "ProjectMedia",

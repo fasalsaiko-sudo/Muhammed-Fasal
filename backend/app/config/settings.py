@@ -60,6 +60,15 @@ class Settings(BaseSettings):
     session_ttl_minutes: int = 480
     session_idle_ttl_minutes: int = 120
     cookie_secure: bool = False
+    # "lax" when the admin and API share a site (current dev: localhost:8000).
+    # A cross-site admin (e.g. Pages origin talking to a different API host)
+    # needs "none", which browsers accept only together with Secure.
+    session_cookie_samesite: str = "lax"
+    csrf_header_name: str = "X-CSRF-Token"
+    max_sessions_per_user: int = 5
+
+    # --- oauth state -------------------------------------------------------
+    oauth_state_ttl_seconds: int = 600
 
     # --- frontend ----------------------------------------------------------
     frontend_url: str = "http://localhost:8080"
@@ -120,6 +129,17 @@ class Settings(BaseSettings):
             object.__setattr__(self, "session_secret", secrets.token_urlsafe(64))
         if len(self.session_secret) < 32:
             raise ValueError("SESSION_SECRET must be at least 32 characters long.")
+        samesite = self.session_cookie_samesite.strip().lower()
+        if samesite not in {"lax", "strict", "none"}:
+            raise ValueError("SESSION_COOKIE_SAMESITE must be one of: lax, strict, none.")
+        object.__setattr__(self, "session_cookie_samesite", samesite)
+        if samesite == "none" and not self.cookie_secure:
+            # Browsers reject SameSite=None without Secure, which would silently
+            # log every administrator out. Fail at startup instead.
+            raise ValueError(
+                "SESSION_COOKIE_SAMESITE=none requires COOKIE_SECURE=true; "
+                "browsers discard SameSite=None cookies that are not Secure."
+            )
         if self.environment == "production":
             if not self.cookie_secure:
                 raise ValueError("COOKIE_SECURE must be true in production.")

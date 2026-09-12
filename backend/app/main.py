@@ -21,10 +21,12 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app import __version__
 from app.config.settings import Settings, get_settings
+from app.middleware.authentication import AuthenticationMiddleware
 from app.middleware.cors import build_cors_middleware
 from app.middleware.request_context import RequestContextMiddleware
 from app.middleware.security import SecurityHeadersMiddleware
 from app.routes import health_router
+from app.routes.auth import auth_router
 from app.routes.public import public_router
 
 _SECRET_PATTERN = re.compile(r"(?i)(token|secret|password|private_key|authorization)=([^\s&]+)")
@@ -102,12 +104,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
 
     # Middleware order matters: outermost first.
+    app.add_middleware(AuthenticationMiddleware, settings=settings)
     app.add_middleware(RequestContextMiddleware)
     app.add_middleware(SecurityHeadersMiddleware, settings=settings)
     build_cors_middleware(app, settings)
 
     app.include_router(health_router)
     app.include_router(public_router)
+    app.include_router(auth_router)
     _register_error_handlers(app, settings)
     return app
 

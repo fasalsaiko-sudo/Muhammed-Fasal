@@ -15,7 +15,11 @@ def test_health_reports_database_and_api(client):
     body = client.get("/health").json()
     assert body["overall"] == "ONLINE"
     names = {service["name"] for service in body["services"]}
-    assert names == {"database", "api"}
+    assert names == {"database", "api", "github"}
+    # GitHub reports configuration state only - connection is session-specific
+    # and belongs to /auth/me.
+    github = next(s for s in body["services"] if s["name"] == "github")
+    assert github["status"] in {"CONFIGURED", "UNCONFIGURED"}
     assert body["checked_at"]
 
 

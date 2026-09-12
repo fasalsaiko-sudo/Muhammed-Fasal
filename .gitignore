@@ -1,7 +1,11 @@
 # --- Secrets (never commit) -------------------------------------------------
 .env
 .env.*
+# Templates are committed; real environment files are not. The `.example`
+# suffix is the marker - `.env.staging` stays ignored, `.env.staging.example`
+# does not.
 !.env.example
+!.env.*.example
 *.pem
 *.key
 *.p12

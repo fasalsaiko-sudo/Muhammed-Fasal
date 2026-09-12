@@ -162,10 +162,12 @@ def test_duplicate_origins_are_collapsed():
     assert settings.cors_origins == ["https://a.example.com"]
 
 
-def test_production_rejects_non_https_origins():
+@pytest.mark.parametrize("env", ["production", "staging"])
+def test_internet_facing_environments_reject_non_https_origins(env):
     with pytest.raises(ValueError) as exc:
-        prod_settings(cors_allowed_origins="http://admin.example.com")
-    assert "https in production" in failure_message(exc.value)
+        prod_settings(environment=env, cors_allowed_origins="http://admin.example.com")
+    message = failure_message(exc.value)
+    assert f"https when ENVIRONMENT={env}" in message
 
 
 def test_production_rejects_a_leftover_localhost_frontend_url():
@@ -230,13 +232,15 @@ def test_callback_url_must_be_an_absolute_http_url(redirect_uri):
     assert "absolute http(s) URL" in failure_message(exc.value)
 
 
-def test_production_callback_url_must_be_https():
+@pytest.mark.parametrize("env", ["production", "staging"])
+def test_internet_facing_environments_require_an_https_callback(env):
     with pytest.raises(ValueError) as exc:
         prod_settings(
+            environment=env,
             github_redirect_uri="http://api.example.com/auth/github/callback",
             api_base_url="http://api.example.com",
         )
-    assert "https in production" in failure_message(exc.value)
+    assert f"https when ENVIRONMENT={env}" in failure_message(exc.value)
 
 
 def test_production_callback_url_must_be_served_by_this_api():
@@ -255,6 +259,34 @@ def test_production_callback_url_may_sit_behind_a_path_prefix():
 
 
 # ============================================ production vs development policy
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"allowed_github_username": ""},
+        {"secure_errors": False},
+        {"rate_limit_enabled": False},
+        {"cookie_secure": False},
+        {"database_url": "postgresql+psycopg://cms:change-me@db:5432/cms"},
+    ],
+)
+def test_staging_is_hardened_exactly_like_production(overrides):
+    """Staging rehearses the deployment, so it may not be hardened less.
+
+    Before this, ENVIRONMENT=staging booted with secure_errors off, rate
+    limiting off, no administrator allowlist and http CORS origins - it would
+    have validated nothing that production depends on.
+    """
+    with pytest.raises(ValueError):
+        prod_settings(environment="staging", **overrides)
+    # And the same override is refused in production, so the two cannot drift.
+    with pytest.raises(ValueError):
+        prod_settings(environment="production", **overrides)
+
+
+def test_staging_does_not_serve_api_docs_by_default():
+    assert prod_settings(environment="staging").serve_api_docs is False
+
+
 def test_production_requires_an_explicit_administrator_allowlist():
     """There is no hardcoded admin; a stale default must not survive a deploy."""
     with pytest.raises(ValueError) as exc:

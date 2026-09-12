@@ -82,20 +82,26 @@ def _validate_session_windows(settings: Settings) -> None:
 
 
 def _validate_production(settings: Settings) -> None:
-    """Every check that must hold before this app serves real traffic.
+    """Every check that must hold before this app faces the internet.
 
-    Each one fails at startup with the name of the variable to fix, rather than
-    degrading silently into a deployment that cannot authenticate anyone.
+    Applies to ``staging`` as well as ``production``: staging rehearses the real
+    deployment, so hardening it less would hide exactly the misconfigurations it
+    exists to catch. Each failure names the variable to fix at startup, rather
+    than degrading silently into a deployment that cannot authenticate anyone.
     """
+    env = settings.environment
+
     if not settings.allowed_github_usernames:
         raise ValueError(
-            "ALLOWED_GITHUB_USERNAME is required in production; there is no default "
-            "administrator. Comma-separate more than one GitHub login."
+            f"ALLOWED_GITHUB_USERNAME is required when ENVIRONMENT={env}; there is no "
+            "default administrator. Comma-separate more than one GitHub login."
         )
     for name in ("api_base_url", "github_redirect_uri"):
         value = getattr(settings, name)
         if _scheme_and_netloc(value)[0] != "https":
-            raise ValueError(f"{name.upper()} must use https in production, got {value!r}.")
+            raise ValueError(
+                f"{name.upper()} must use https when ENVIRONMENT={env}, got {value!r}."
+            )
     api_base = settings.api_base_url.rstrip("/")
     if api_base and not settings.github_redirect_uri.startswith(f"{api_base}/"):
         raise ValueError(
@@ -106,22 +112,26 @@ def _validate_production(settings: Settings) -> None:
     origins = settings.cors_origins
     if not origins:
         raise ValueError(
-            "CORS_ALLOWED_ORIGINS is required in production; with no origin the "
-            "browser admin cannot call the API at all."
+            f"CORS_ALLOWED_ORIGINS is required when ENVIRONMENT={env}; with no origin "
+            "the browser admin cannot call the API at all."
         )
     for origin in origins:
         if _scheme_and_netloc(origin)[0] != "https":
             raise ValueError(
-                f"CORS_ALLOWED_ORIGINS must be https in production, got {origin!r}."
+                f"CORS_ALLOWED_ORIGINS must be https when ENVIRONMENT={env}, got {origin!r}."
             )
+    if not settings.cookie_secure:
+        raise ValueError(f"COOKIE_SECURE must be true when ENVIRONMENT={env}.")
     if not settings.secure_errors:
-        raise ValueError("SECURE_ERRORS must be true in production; stack traces must not leak.")
+        raise ValueError(
+            f"SECURE_ERRORS must be true when ENVIRONMENT={env}; stack traces must not leak."
+        )
     if not settings.rate_limit_enabled:
-        raise ValueError("RATE_LIMIT_ENABLED must be true in production.")
+        raise ValueError(f"RATE_LIMIT_ENABLED must be true when ENVIRONMENT={env}.")
     password = _db_password(settings.database_url)
     if password in _PLACEHOLDER_DB_PASSWORDS:
         raise ValueError(
-            "DATABASE_URL still has a placeholder password in production; "
+            f"DATABASE_URL still has a placeholder password when ENVIRONMENT={env}; "
             "set a real credential."
         )
 
@@ -275,7 +285,7 @@ class Settings(BaseSettings):
                 raise ValueError("GitHub OAuth credentials are required in production.")
         _validate_urls(self)
         _validate_session_windows(self)
-        if self.environment == "production":
+        if self.is_production_like:
             _validate_production(self)
         object.__setattr__(self, "log_level", self.log_level.upper())
         return self
@@ -286,6 +296,17 @@ class Settings(BaseSettings):
         return self.environment == "production"
 
     @property
+    def is_production_like(self) -> bool:
+        """Environments that are internet-facing and must behave like production.
+
+        Staging exists to rehearse a production deployment, so hardening it less
+        than production defeats the purpose: the checks that matter (secure
+        cookies, https, an explicit administrator allowlist, no stack traces,
+        rate limiting) must already be in force there.
+        """
+        return self.environment in {"staging", "production"}
+
+    @property
     def serve_api_docs(self) -> bool:
         """Whether /docs, /redoc and /openapi.json are exposed.
 
@@ -294,7 +315,9 @@ class Settings(BaseSettings):
         convenience and treating that as consent would publish the whole admin
         API surface to anonymous callers.
         """
-        return self.docs_enabled and (self.docs_enabled_in_production or not self.is_production)
+        return self.docs_enabled and (
+            self.docs_enabled_in_production or not self.is_production_like
+        )
 
     @property
     def allowed_github_usernames(self) -> set[str]:

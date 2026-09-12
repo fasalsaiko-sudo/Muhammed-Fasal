@@ -43,7 +43,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "Permissions-Policy", "geolocation=(), microphone=(), camera=(), interest-cohort=()"
         )
         response.headers.setdefault("Cache-Control", "no-store")
-        if self.settings.cookie_secure or self.settings.is_production:
+        if self.settings.cookie_secure or self.settings.is_production_like:
             response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
         # Never advertise the framework/version.
         if "Server" in response.headers:

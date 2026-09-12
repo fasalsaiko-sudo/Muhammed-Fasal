@@ -67,25 +67,27 @@ Optional overrides, useful for GitHub Enterprise: `GITHUB_AUTHORIZE_URL`,
 ### Validation enforced at startup
 
 `Settings` refuses to boot with an insecure configuration rather than failing
-later at login time:
+later at login time. Rows marked **staging/production** apply to both: staging
+rehearses the deployment, so hardening it less than production would hide the
+exact misconfigurations it exists to catch. See `docs/deployment.md`.
 
 | Condition | Applies | Behaviour |
 | --- | --- | --- |
-| `SESSION_SECRET` missing | production | **startup error** |
+| `SESSION_SECRET` missing | staging/production | **startup error** |
 | `SESSION_SECRET` shorter than 32 characters | all | **startup error** |
-| `COOKIE_SECURE=false` | production | **startup error** |
+| `COOKIE_SECURE=false` | staging/production | **startup error** |
 | `SESSION_COOKIE_SAMESITE=none` without `COOKIE_SECURE=true` | all | **startup error** |
 | `SESSION_COOKIE_SAMESITE` not `lax`/`strict`/`none` | all | **startup error** |
-| GitHub client ID/secret missing | production | **startup error** |
-| `ALLOWED_GITHUB_USERNAME` empty | production | **startup error** (no default admin) |
-| `API_BASE_URL` / `GITHUB_REDIRECT_URI` not https | production | **startup error** |
-| `GITHUB_REDIRECT_URI` not under `API_BASE_URL` | production | **startup error** |
+| GitHub client ID/secret missing | staging/production | **startup error** |
+| `ALLOWED_GITHUB_USERNAME` empty | staging/production | **startup error** (no default admin) |
+| `API_BASE_URL` / `GITHUB_REDIRECT_URI` not https | staging/production | **startup error** |
+| `GITHUB_REDIRECT_URI` not under `API_BASE_URL` | staging/production | **startup error** |
 | `CORS_ALLOWED_ORIGINS` contains `*` | all | **startup error** |
 | `CORS_ALLOWED_ORIGINS` entry is not an absolute http(s) origin | all | **startup error** |
-| `CORS_ALLOWED_ORIGINS` empty, or non-https | production | **startup error** |
-| `SECURE_ERRORS=false` | production | **startup error** |
-| `RATE_LIMIT_ENABLED=false` | production | **startup error** |
-| `DATABASE_URL` still has a placeholder password | production | **startup error** |
+| `CORS_ALLOWED_ORIGINS` empty, or non-https | staging/production | **startup error** |
+| `SECURE_ERRORS=false` | staging/production | **startup error** |
+| `RATE_LIMIT_ENABLED=false` | staging/production | **startup error** |
+| `DATABASE_URL` still has a placeholder password | staging/production | **startup error** |
 | `SESSION_IDLE_TTL_MINUTES` > `SESSION_TTL_MINUTES` | all | **startup error** |
 | Any URL setting that is not an absolute http(s) URL | all | **startup error** |
 | `SESSION_SECRET` missing in development | development | an ephemeral secret is generated (sessions do not survive a restart, which is the correct dev behaviour) |
@@ -149,6 +151,9 @@ and keep `COOKIE_SECURE=false` (the `Secure` flag would stop the browser sending
 the cookie over plain HTTP).
 
 ## Production
+
+For the deployment procedure itself, the staging environment and the recorded
+verification results, see **`docs/deployment.md`**.
 
 Minimum production configuration:
 

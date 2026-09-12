@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 from sqlalchemy import func, inspect, select, text
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session as SASession
 
 from app.models import (
     AdminSession,
@@ -152,26 +153,69 @@ def _is_check_violation(error: IntegrityError) -> bool:
     )
 
 
-def test_project_slug_is_unique(db):
-    """A duplicate projects.slug is rejected by the database, not just the ORM."""
-    db.add(Project(title="Dup", slug="unique-slug-check"))
-    db.commit()
+def _orm_duplicate_insert_error(db, title: str, slug: str) -> IntegrityError:
+    """Drive a duplicate insert through the real ORM path and return the error.
 
-    duplicate = (
-        "INSERT INTO projects (title, slug, status, sort_order, featured, created_at, "
-        "updated_at) VALUES ('Dup 2', 'unique-slug-check', 'DRAFT', 0, false, now(), now())"
-        if _engine_of(db).dialect.name == "postgresql"
-        else "INSERT INTO projects (title, slug, status, sort_order, featured, created_at, "
-        "updated_at) VALUES ('Dup 2', 'unique-slug-check', 'DRAFT', 0, 0, "
-        "'2026-01-01', '2026-01-01')"
-    )
+    PGlite harness limitation (reproduced on PostgreSQL 18.3 / PGlite 0.5.8):
+    when ``Session.commit()`` fails, SQLAlchemy runs ``transaction.rollback()``,
+    which issues a bare ``ROLLBACK``. PGlite answers that with ``received 0
+    results from command 'ROLLBACK'``, psycopg raises ``InternalError``, and the
+    genuine ``UniqueViolation`` is masked. ``begin_nested()`` does not help - the
+    internal rollback still fires.
 
-    error = _constraint_error(db, duplicate)
+    Binding the session to an AUTOCOMMIT connection removes the transaction that
+    would need rolling back, so the database's own ``IntegrityError`` propagates
+    unchanged and ``Session.add()`` + ``Session.commit()`` - the path the
+    application actually uses - is what gets asserted. The connection is
+    single-use and discarded; the assertion stays on the specific
+    ``IntegrityError`` plus its driver-level cause, never a generic exception.
+    """
+    connection = _engine_of(db).connect().execution_options(isolation_level="AUTOCOMMIT")
+    session = SASession(bind=connection)
+    try:
+        session.add(Project(title=title, slug=slug))
+        with pytest.raises(IntegrityError) as excinfo:
+            session.commit()
+        return excinfo.value
+    finally:
+        session.close()
+        connection.close()
+
+
+def _assert_unique_violation(error: IntegrityError) -> None:
     assert _is_unique_violation(error), f"expected a unique violation, got {error.orig!r}"
     reported = str(error).lower()
     assert "ix_projects_slug" in reported or "projects.slug" in reported, str(error)
 
-    # The original row survived and the duplicate never landed.
+
+def test_project_slug_is_unique(db):
+    """A duplicate projects.slug is rejected by the ORM path and by the DDL."""
+    db.add(Project(title="Dup", slug="unique-slug-check"))
+    db.commit()
+
+    # 1. Through Session.add() + Session.commit(), the path the app uses.
+    _assert_unique_violation(_orm_duplicate_insert_error(db, "Dup 2", "unique-slug-check"))
+
+    # 2. Through raw SQL, so the constraint is proven independently of the ORM.
+    duplicate = (
+        "INSERT INTO projects (title, slug, status, sort_order, featured, created_at, "
+        "updated_at) VALUES ('Dup 3', 'unique-slug-check', 'DRAFT', 0, false, now(), now())"
+        if _engine_of(db).dialect.name == "postgresql"
+        else "INSERT INTO projects (title, slug, status, sort_order, featured, created_at, "
+        "updated_at) VALUES ('Dup 3', 'unique-slug-check', 'DRAFT', 0, 0, "
+        "'2026-01-01', '2026-01-01')"
+    )
+    _assert_unique_violation(_constraint_error(db, duplicate))
+
+    # 3. The unique index really is in the schema, not just implied.
+    unique_indexes = {
+        ix["name"]
+        for ix in inspect(_engine_of(db)).get_indexes("projects")
+        if ix.get("unique") and ix.get("column_names") == ["slug"]
+    }
+    assert "ix_projects_slug" in unique_indexes, f"no unique index on projects.slug, found {unique_indexes}"
+
+    # The original row survived and neither duplicate landed.
     remaining = db.scalar(
         select(func.count()).select_from(Project).where(Project.slug == "unique-slug-check")
     )

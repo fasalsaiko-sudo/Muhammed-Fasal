@@ -1,0 +1,51 @@
+# --- Secrets (never commit) -------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+service-account*.json
+credentials*.json
+secrets/
+**/google_credentials.json
+
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+backend/.test-portfolio.db
+
+# --- Unverified parked code (see backend/_phase_staging/README.md) ----------
+# Generated during the rejected one-pass implementation. Kept on disk, kept out
+# of the tree and out of Git until each module is re-introduced with passing
+# tests in its own phase. The README stays committed so the reason is recorded.
+backend/_phase_staging/**
+!backend/_phase_staging/README.md
+
+# --- Flutter / Dart ---------------------------------------------------------
+.dart_tool/
+.packages
+admin/build/
+admin/.flutter-plugins*
+
+# --- Node / frontend tooling ------------------------------------------------
+node_modules/
+dist/
+build/
+.next/
+.cache/
+
+# --- OS / editor ------------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
